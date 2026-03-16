@@ -1,6 +1,6 @@
 # blefyi
 
-[![PyPI](https://img.shields.io/pypi/v/blefyi)](https://pypi.org/project/blefyi/)
+[![PyPI version](https://agentgif.com/badge/pypi/blefyi/version.svg)](https://pypi.org/project/blefyi/)
 [![Python](https://img.shields.io/pypi/pyversions/blefyi)](https://pypi.org/project/blefyi/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
