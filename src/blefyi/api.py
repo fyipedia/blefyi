@@ -7,9 +7,9 @@ Usage::
     from blefyi.api import BLEFYI
 
     with BLEFYI() as api:
-        results = api.search("nordic")
-        chip = api.chip("nrf52840")
-        comparison = api.compare("nrf52840", "esp32-c3")
+        items = api.list_beacons()
+        detail = api.get_beacon("example-slug")
+        results = api.search("query")
 """
 
 from __future__ import annotations
@@ -22,9 +22,8 @@ import httpx
 class BLEFYI:
     """API client for the blefyi.com REST API.
 
-    Provides access to 11 endpoints covering BLE chips, GATT profiles,
-    Bluetooth versions, beacon protocols, use cases, manufacturers,
-    glossary terms, search, comparison, and random discovery.
+    Provides typed access to all blefyi.com endpoints including
+    list, detail, and search operations.
 
     Args:
         base_url: API base URL. Defaults to ``https://blefyi.com``.
@@ -38,101 +37,113 @@ class BLEFYI:
     ) -> None:
         self._client = httpx.Client(base_url=base_url, timeout=timeout)
 
-    # -- HTTP helpers ----------------------------------------------------------
-
     def _get(self, path: str, **params: Any) -> dict[str, Any]:
-        resp = self._client.get(path, params={k: v for k, v in params.items() if v is not None})
+        resp = self._client.get(
+            path,
+            params={k: v for k, v in params.items() if v is not None},
+        )
         resp.raise_for_status()
         result: dict[str, Any] = resp.json()
         return result
 
-    # -- Endpoints -------------------------------------------------------------
+    # -- Endpoints -----------------------------------------------------------
 
-    def chip(self, slug: str) -> dict[str, Any]:
-        """Get BLE chip detail with specs, profiles, and manufacturer.
+    def list_beacons(self, **params: Any) -> dict[str, Any]:
+        """List all beacons."""
+        return self._get("/api/v1/beacons/", **params)
 
-        Args:
-            slug: Chip URL slug (e.g. ``"nrf52840"``, ``"esp32-c3"``, ``"cc2640r2f"``).
-        """
-        return self._get(f"/api/chip/{slug}/")
+    def get_beacon(self, slug: str) -> dict[str, Any]:
+        """Get beacon by slug."""
+        return self._get(f"/api/v1/beacons/" + slug + "/")
 
-    def profile(self, slug: str) -> dict[str, Any]:
-        """Get GATT profile detail with characteristics and services.
+    def list_chips(self, **params: Any) -> dict[str, Any]:
+        """List all chips."""
+        return self._get("/api/v1/chips/", **params)
 
-        Args:
-            slug: Profile URL slug (e.g. ``"heart-rate"``, ``"blood-pressure"``, ``"hid"``).
-        """
-        return self._get(f"/api/profile/{slug}/")
+    def get_chip(self, slug: str) -> dict[str, Any]:
+        """Get chip by slug."""
+        return self._get(f"/api/v1/chips/" + slug + "/")
 
-    def version(self, slug: str) -> dict[str, Any]:
-        """Get Bluetooth version detail with features and changelog.
+    def list_faqs(self, **params: Any) -> dict[str, Any]:
+        """List all faqs."""
+        return self._get("/api/v1/faqs/", **params)
 
-        Args:
-            slug: Version URL slug (e.g. ``"4-0"``, ``"5-0"``, ``"5-4"``).
-        """
-        return self._get(f"/api/version/{slug}/")
+    def get_faq(self, slug: str) -> dict[str, Any]:
+        """Get faq by slug."""
+        return self._get(f"/api/v1/faqs/" + slug + "/")
 
-    def beacon(self, slug: str) -> dict[str, Any]:
-        """Get beacon protocol detail with advertising format and use cases.
+    def list_glossary(self, **params: Any) -> dict[str, Any]:
+        """List all glossary."""
+        return self._get("/api/v1/glossary/", **params)
 
-        Args:
-            slug: Beacon URL slug (e.g. ``"ibeacon"``, ``"eddystone"``, ``"altbeacon"``).
-        """
-        return self._get(f"/api/beacon/{slug}/")
+    def get_term(self, slug: str) -> dict[str, Any]:
+        """Get term by slug."""
+        return self._get(f"/api/v1/glossary/" + slug + "/")
 
-    def usecase(self, slug: str) -> dict[str, Any]:
-        """Get BLE use case detail with related chips and profiles.
+    def list_guides(self, **params: Any) -> dict[str, Any]:
+        """List all guides."""
+        return self._get("/api/v1/guides/", **params)
 
-        Args:
-            slug: Use case URL slug (e.g. ``"asset-tracking"``, ``"wearable-fitness"``).
-        """
-        return self._get(f"/api/usecase/{slug}/")
+    def get_guide(self, slug: str) -> dict[str, Any]:
+        """Get guide by slug."""
+        return self._get(f"/api/v1/guides/" + slug + "/")
 
-    def manufacturer(self, slug: str) -> dict[str, Any]:
-        """Get manufacturer detail with BLE chip lineup.
+    def list_manufacturers(self, **params: Any) -> dict[str, Any]:
+        """List all manufacturers."""
+        return self._get("/api/v1/manufacturers/", **params)
 
-        Args:
-            slug: Manufacturer URL slug (e.g. ``"nordic-semiconductor"``, ``"espressif"``).
-        """
-        return self._get(f"/api/manufacturer/{slug}/")
+    def get_manufacturer(self, slug: str) -> dict[str, Any]:
+        """Get manufacturer by slug."""
+        return self._get(f"/api/v1/manufacturers/" + slug + "/")
 
-    def glossary_term(self, slug: str) -> dict[str, Any]:
-        """Get glossary term definition for tooltips and reference.
+    def list_mesh(self, **params: Any) -> dict[str, Any]:
+        """List all mesh."""
+        return self._get("/api/v1/mesh/", **params)
 
-        Args:
-            slug: Term URL slug (e.g. ``"gatt"``, ``"advertising"``, ``"connection-interval"``).
-        """
-        return self._get(f"/api/term/{slug}/")
+    def get_mesh(self, slug: str) -> dict[str, Any]:
+        """Get mesh by slug."""
+        return self._get(f"/api/v1/mesh/" + slug + "/")
 
-    def search(self, query: str) -> dict[str, Any]:
-        """Search across chips, profiles, versions, beacons, and glossary terms.
+    def list_profiles(self, **params: Any) -> dict[str, Any]:
+        """List all profiles."""
+        return self._get("/api/v1/profiles/", **params)
 
-        Args:
-            query: Search term (minimum 2 characters).
-        """
-        return self._get("/api/search/", q=query)
+    def get_profile(self, slug: str) -> dict[str, Any]:
+        """Get profile by slug."""
+        return self._get(f"/api/v1/profiles/" + slug + "/")
 
-    def compare(self, slug_a: str, slug_b: str) -> dict[str, Any]:
-        """Compare two BLE chips side by side.
+    def list_tools(self, **params: Any) -> dict[str, Any]:
+        """List all tools."""
+        return self._get("/api/v1/tools/", **params)
 
-        Args:
-            slug_a: First chip slug (e.g. ``"nrf52840"``).
-            slug_b: Second chip slug (e.g. ``"esp32-c3"``).
-        """
-        return self._get("/api/compare/", a=slug_a, b=slug_b)
+    def get_tool(self, slug: str) -> dict[str, Any]:
+        """Get tool by slug."""
+        return self._get(f"/api/v1/tools/" + slug + "/")
 
-    def random(self) -> dict[str, Any]:
-        """Get a random BLE chip with full detail."""
-        return self._get("/api/random/")
+    def list_use_cases(self, **params: Any) -> dict[str, Any]:
+        """List all use cases."""
+        return self._get("/api/v1/use-cases/", **params)
 
-    def openapi(self) -> dict[str, Any]:
-        """Get the OpenAPI 3.1.0 specification."""
-        return self._get("/api/openapi.json")
+    def get_use_case(self, slug: str) -> dict[str, Any]:
+        """Get use case by slug."""
+        return self._get(f"/api/v1/use-cases/" + slug + "/")
 
-    # -- Context manager -------------------------------------------------------
+    def list_versions(self, **params: Any) -> dict[str, Any]:
+        """List all versions."""
+        return self._get("/api/v1/versions/", **params)
+
+    def get_version(self, slug: str) -> dict[str, Any]:
+        """Get version by slug."""
+        return self._get(f"/api/v1/versions/" + slug + "/")
+
+    def search(self, query: str, **params: Any) -> dict[str, Any]:
+        """Search across all content."""
+        return self._get(f"/api/v1/search/", q=query, **params)
+
+    # -- Lifecycle -----------------------------------------------------------
 
     def close(self) -> None:
-        """Close the underlying HTTP connection."""
+        """Close the underlying HTTP client."""
         self._client.close()
 
     def __enter__(self) -> BLEFYI:
