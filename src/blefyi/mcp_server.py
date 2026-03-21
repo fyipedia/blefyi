@@ -1,144 +1,88 @@
-"""MCP server for blefyi -- Bluetooth Low Energy tools for AI assistants.
+"""MCP server for blefyi — AI assistant tools for blefyi.com.
 
-Requires the ``mcp`` extra: ``pip install blefyi[mcp]``
-
-Run as a standalone server::
-
-    python -m blefyi.mcp_server
-
-Or configure in ``claude_desktop_config.json``::
-
-    {
-        "mcpServers": {
-            "blefyi": {
-                "command": "python",
-                "args": ["-m", "blefyi.mcp_server"]
-            }
-        }
-    }
+Run: uvx --from "blefyi[mcp]" python -m blefyi.mcp_server
 """
-
 from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("blefyi")
+mcp = FastMCP("BLEFYI")
 
 
 @mcp.tool()
-def ble_search(query: str) -> str:
-    """Search for BLE chips, GATT profiles, Bluetooth versions, and terminology on BLEFYI.
-
-    Search across BLE chips (nRF52840, ESP32-C3, CC2640R2F), GATT profiles
-    (Heart Rate, Blood Pressure, HID), Bluetooth versions (4.0-5.4),
-    beacon protocols (iBeacon, Eddystone), and glossary terms.
+def list_profiles(limit: int = 20, offset: int = 0) -> str:
+    """List profiles from blefyi.com.
 
     Args:
-        query: Search term (e.g. "nordic", "heart rate", "ibeacon", "advertising").
+        limit: Maximum number of results. Default 20.
+        offset: Number of results to skip. Default 0.
     """
     from blefyi.api import BLEFYI
 
     with BLEFYI() as api:
-        results = api.search(query)
-
-    items = results.get("results", [])
-    if not items:
-        return f"No results found for '{query}'."
-
-    lines = [
-        f"## BLE Search: {query}",
-        "",
-        f"Found {len(items)} result(s):",
-        "",
-        "| Type | Name | Slug |",
-        "|------|------|------|",
-    ]
-
-    for item in items:
-        t, n, s = item.get("type", ""), item.get("name", ""), item.get("slug", "")
-        lines.append(f"| {t} | {n} | {s} |")
-
-    return "\n".join(lines)
+        data = api.list_profiles(limit=limit, offset=offset)
+        results = data.get("results", data) if isinstance(data, dict) else data
+        if not results:
+            return "No profiles found."
+        items = results[:limit] if isinstance(results, list) else []
+        return "\n".join(f"- {item.get('name', item.get('slug', '?'))}" for item in items)
 
 
 @mcp.tool()
-def ble_lookup(slug: str) -> str:
-    """Look up a specific BLE chip by slug.
-
-    Returns full specifications including manufacturer, Bluetooth version,
-    RAM, flash, TX power, supported profiles, and use cases.
+def get_profile(slug: str) -> str:
+    """Get detailed information about a specific profile.
 
     Args:
-        slug: Chip slug (e.g. "nrf52840", "esp32-c3", "cc2640r2f", "da14695").
+        slug: URL slug identifier for the profile.
     """
     from blefyi.api import BLEFYI
 
     with BLEFYI() as api:
-        data = api.chip(slug)
-
-    lines = [
-        f"## {data.get('name', slug)}",
-        "",
-        data.get("description", ""),
-        "",
-        f"- **Manufacturer**: {data.get('manufacturer', 'N/A')}",
-        f"- **Bluetooth Version**: {data.get('bluetooth_version', 'N/A')}",
-        f"- **RAM**: {data.get('ram', 'N/A')}",
-        f"- **Flash**: {data.get('flash', 'N/A')}",
-        f"- **TX Power**: {data.get('tx_power', 'N/A')}",
-        f"- **Range**: {data.get('range', 'N/A')}",
-    ]
-
-    profiles = data.get("profiles", [])
-    if profiles:
-        lines.append("")
-        lines.append("### Supported Profiles")
-        for p in profiles:
-            lines.append(f"- {p.get('name', '')} ({p.get('slug', '')})")
-
-    return "\n".join(lines)
+        data = api.get_profile(slug)
+        return str(data)
 
 
 @mcp.tool()
-def ble_compare(slug_a: str, slug_b: str) -> str:
-    """Compare two BLE chips side by side.
+def list_beacons(limit: int = 20, offset: int = 0) -> str:
+    """List beacons from blefyi.com.
 
     Args:
-        slug_a: First chip slug (e.g. "nrf52840").
-        slug_b: Second chip slug (e.g. "esp32-c3").
+        limit: Maximum number of results. Default 20.
+        offset: Number of results to skip. Default 0.
     """
     from blefyi.api import BLEFYI
 
     with BLEFYI() as api:
-        data = api.compare(slug_a, slug_b)
+        data = api.list_beacons(limit=limit, offset=offset)
+        results = data.get("results", data) if isinstance(data, dict) else data
+        if not results:
+            return "No beacons found."
+        items = results[:limit] if isinstance(results, list) else []
+        return "\n".join(f"- {item.get('name', item.get('slug', '?'))}" for item in items)
 
-    a = data.get("a", {})
-    b = data.get("b", {})
 
-    lines = [
-        f"## {a.get('name', slug_a)} vs {b.get('name', slug_b)}",
-        "",
-        "| Property | " + a.get("name", slug_a) + " | " + b.get("name", slug_b) + " |",
-        "|----------|"
-        + "-" * len(a.get("name", slug_a))
-        + "--|"
-        + "-" * len(b.get("name", slug_b))
-        + "--|",
-    ]
+@mcp.tool()
+def search_ble(query: str) -> str:
+    """Search blefyi.com for BLE profiles, beacons, GATT services, and chips.
 
-    fields = [
-        ("Manufacturer", "manufacturer"),
-        ("Bluetooth Version", "bluetooth_version"),
-        ("RAM", "ram"),
-        ("Flash", "flash"),
-        ("TX Power", "tx_power"),
-        ("Range", "range"),
-    ]
-    for label, key in fields:
-        lines.append(f"| {label} | {a.get(key, '-')} | {b.get(key, '-')} |")
+    Args:
+        query: Search query string.
+    """
+    from blefyi.api import BLEFYI
 
-    return "\n".join(lines)
+    with BLEFYI() as api:
+        data = api.search(query)
+        results = data.get("results", data) if isinstance(data, dict) else data
+        if not results:
+            return f"No results found for \"{query}\"."
+        items = results[:10] if isinstance(results, list) else []
+        return "\n".join(f"- {item.get('name', item.get('slug', '?'))}" for item in items)
+
+
+def main() -> None:
+    """Run the MCP server."""
+    mcp.run()
 
 
 if __name__ == "__main__":
-    mcp.run()
+    main()

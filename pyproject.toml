@@ -1,6 +1,6 @@
 [project]
 name = "blefyi"
-version = "0.1.0"
+version = "0.1.1"
 description = "Bluetooth Low Energy encyclopedia API client — look up BLE chips, GATT profiles, Bluetooth versions, beacon protocols, and IoT specifications from BLEFYI."
 readme = "README.md"
 license = "MIT"
@@ -42,6 +42,7 @@ all = ["blefyi[api,cli,mcp]"]
 
 [project.scripts]
 blefyi = "blefyi.cli:app"
+blefyi-mcp = "blefyi.mcp_server:main"
 
 [project.entry-points."mcp.servers"]
 blefyi = "blefyi.mcp_server:mcp"
