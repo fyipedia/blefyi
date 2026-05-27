@@ -298,6 +298,15 @@ Embed [BLEFYI](https://blefyi.com) widgets on any website with [blefyi-embed](ht
 
 Zero dependencies · Shadow DOM · 4 themes (light/dark/sepia/auto) · [Widget docs](https://widget.blefyi.com)
 
+## Recently Updated (v0.1.2)
+
+Latest content state on [https://blefyi.com](https://blefyi.com):
+- [Homepage](https://blefyi.com)
+- [Developer documentation](https://blefyi.com/developers/)
+- [Sitemap (full content index)](https://blefyi.com/sitemap.xml)
+
+Version bumped 2026-05-27 as part of the FYIPedia [SEO recovery refresh](https://github.com/dobestan).
+
 ## License
 
 MIT
