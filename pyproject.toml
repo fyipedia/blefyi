@@ -1,6 +1,6 @@
 [project]
 name = "blefyi"
-version = "0.1.1"
+version = "0.1.2"
 description = "Bluetooth Low Energy encyclopedia API client — look up BLE chips, GATT profiles, Bluetooth versions, beacon protocols, and IoT specifications from BLEFYI."
 readme = "README.md"
 license = "MIT"
