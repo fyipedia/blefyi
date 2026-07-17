@@ -1,0 +1,10 @@
+# Smithery configuration for blefyi
+# https://smithery.ai/docs/build/project-config
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required: []
+    properties: {}
+  commandFunction: |-
+    config => ({ command: 'uvx', args: ['--from', 'blefyi[mcp]', 'python', '-m', 'blefyi.mcp_server'] })

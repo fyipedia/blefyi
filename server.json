@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.fyipedia/blefyi",
+  "description": "Bluetooth Low Energy encyclopedia API client — look up BLE chips, GATT profiles, Bluetooth versions",
+  "version": "0.1.1",
+  "repository": {
+    "url": "https://github.com/fyipedia/blefyi",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "blefyi",
+      "version": "0.1.1",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "--from",
+          "value": "blefyi[mcp]"
+        },
+        {
+          "type": "positional",
+          "value": "python"
+        },
+        {
+          "type": "positional",
+          "value": "-m"
+        },
+        {
+          "type": "positional",
+          "value": "blefyi.mcp_server"
+        }
+      ]
+    }
+  ]
+}
